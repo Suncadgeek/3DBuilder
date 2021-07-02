@@ -70,27 +70,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NXOpen">
-      <HintPath>..\..\..\..\..\..\Apps\Siemens\NX1973\NXBIN\managed\NXOpen.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Siemens\NX12\NXBIN\managed\NXOpen.dll</HintPath>
     </Reference>
     <Reference Include="NXOpen.Guide">
-      <HintPath>..\..\..\..\..\..\Apps\Siemens\NX1973\NXBIN\managed\NXOpen.Guide.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Siemens\NX12\NXBIN\managed\NXOpen.Guide.dll</HintPath>
     </Reference>
     <Reference Include="NXOpen.UF">
-      <HintPath>..\..\..\..\..\..\Apps\Siemens\NX1973\NXBIN\managed\NXOpen.UF.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Siemens\NX12\NXBIN\managed\NXOpen.UF.dll</HintPath>
     </Reference>
     <Reference Include="NXOpen.Utilities">
-      <HintPath>..\..\..\..\..\..\Apps\Siemens\NX1973\NXBIN\managed\NXOpen.Utilities.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Siemens\NX12\NXBIN\managed\NXOpen.Utilities.dll</HintPath>
     </Reference>
     <Reference Include="NXOpenUI">
-      <HintPath>..\..\..\..\..\..\Apps\Siemens\NX1973\NXBIN\managed\NXOpenUI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Siemens\NX12\NXBIN\managed\NXOpenUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.ValueTuple, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Documents\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
