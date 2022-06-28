@@ -21,7 +21,7 @@ Public Class Form1
 
 
             TextBox1.Text = sr.ReadLine()
-            'TextBox2.Text = sr.ReadLine()
+            TextBox2.Text = sr.ReadLine()
             'TextBox3.Text = sr.ReadLine()
             ' TextBox4.Text = sr.ReadLine()
             'TextBox5.Text = sr.ReadLine()
@@ -39,11 +39,11 @@ Public Class Form1
         Dim sw As New System.IO.StreamWriter(configfilepath) 'le fichier est ensuite sauvegardé
 
         sw.Flush()
-        Dim configw(0) As String
+        Dim configw(1) As String
         configw(0) = TextBox1.Text
+        configw(1) = TextBox2.Text
 
-
-        For i = 0 To 0
+        For i = 0 To 1
             sw.WriteLine(configw(i))
         Next
         sw.Close()
