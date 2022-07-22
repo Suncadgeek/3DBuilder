@@ -79,7 +79,7 @@ Partial Class Form1
         'ProgressBar1
         '
         Me.ProgressBar1.Location = New System.Drawing.Point(101, 126)
-        Me.ProgressBar1.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.ProgressBar1.Margin = New System.Windows.Forms.Padding(2)
         Me.ProgressBar1.Maximum = 1000
         Me.ProgressBar1.Name = "ProgressBar1"
         Me.ProgressBar1.Size = New System.Drawing.Size(188, 29)
@@ -92,16 +92,16 @@ Partial Class Form1
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(375, 20)
         Me.TextBox2.TabIndex = 13
-        Me.TextBox2.Text = "CAO000083492"
+        Me.TextBox2.Text = "CAO000084130"
         '
         'Label2
         '
         Me.Label2.AutoSize = True
         Me.Label2.Location = New System.Drawing.Point(12, 75)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(194, 13)
+        Me.Label2.Size = New System.Drawing.Size(253, 13)
         Me.Label2.TabIndex = 11
-        Me.Label2.Text = "Référence TC du squelette à assembler"
+        Me.Label2.Text = "Référence TC de l'anneau de stockage à assembler"
         '
         'Form1
         '

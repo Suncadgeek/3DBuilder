@@ -9,7 +9,7 @@
     <AssemblyName>$(PROJECT_NAME)</AssemblyName>
     <MyType>WindowsFormsWithCustomSubMain</MyType>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <ProjectGuid>{76110AE6-FA46-4608-9613-9617CC32C46D}</ProjectGuid>
+    <ProjectGuid>{D586A7B7-CD33-44B3-938C-3EB5DC8C4591}</ProjectGuid>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -122,10 +122,10 @@
     <Content Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.Designer.vb">
-      <DependentUpon>Form1.vb</DependentUpon>
+    <Compile Include="3DBForm1.Designer.vb">
+      <DependentUpon>3DBForm1.vb</DependentUpon>
     </Compile>
-    <Compile Include="Form1.vb">
+    <Compile Include="3DBForm1.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\Settings.Designer.vb">
@@ -133,12 +133,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="MyProgram.vb" />
+    <Compile Include="3DBProgram.vb" />
     <Compile Include="Unload.vb" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.vb</DependentUpon>
+    <EmbeddedResource Include="3DBForm1.resx">
+      <DependentUpon>3DBForm1.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
