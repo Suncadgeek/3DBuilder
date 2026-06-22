@@ -86,7 +86,7 @@ namespace ThreeDBuilder
                 : config.StorageRingTcRef;
             _assembly.OpenStorageRing(_resolver, ringToken);
             _cells = _assembly.EnumerateCells();
-            _log.Info($"{_cells.Count} cellule(s) trouvée(s).");
+            _log.Info($"{_cells.Count} cellule(s) trouvée(s) : " + string.Join(", ", _cells.Select(c => c.Name)));
 
             var inputs = BuildPreflightInputs(_cells, config.SelectedCells);
             var report = new PreflightChecker().Check(inputs, _dictionary);

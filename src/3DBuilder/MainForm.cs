@@ -158,7 +158,19 @@ namespace ThreeDBuilder
                 if (d.ShowDialog() == DialogResult.OK) txtNativeRing.Text = d.FileName;
         }
         private void OnModeChanged(object sender, EventArgs e) => UpdateNativeFieldsEnabled();
-        private void OnAllRingChanged(object sender, EventArgs e) => lstCells.Enabled = !chkAllRing.Checked;
+        private void OnAllRingChanged(object sender, EventArgs e)
+        {
+            bool pick = !chkAllRing.Checked;
+            lstCells.Enabled = pick;
+            btnCheckAll.Enabled = pick;
+            btnUncheckAll.Enabled = pick;
+        }
+        private void OnCheckAll(object sender, EventArgs e) => SetAllCells(true);
+        private void OnUncheckAll(object sender, EventArgs e) => SetAllCells(false);
+        private void SetAllCells(bool value)
+        {
+            for (int i = 0; i < lstCells.Items.Count; i++) lstCells.SetItemChecked(i, value);
+        }
         private void OnLogLevelChanged(object sender, EventArgs e)
         {
             if (_log != null) _log.MinLevel = cboLogLevel.SelectedIndex;

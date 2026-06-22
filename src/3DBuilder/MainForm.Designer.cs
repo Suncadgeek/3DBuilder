@@ -21,6 +21,7 @@ namespace ThreeDBuilder
         private TextBox txtNativeRing; private Button btnBrowseRing;
         private CheckBox chkAllRing;
         private CheckedListBox lstCells;
+        private Button btnCheckAll; private Button btnUncheckAll;
         private CheckBox chkForce;
         private Button btnAnalyze; private Button btnGenerate; private Button btnCancel;
         private ComboBox cboLogLevel;
@@ -107,11 +108,21 @@ namespace ThreeDBuilder
             this.chkAllRing = new CheckBox { Text = "Tout l'anneau", AutoSize = true, Checked = true, Margin = new Padding(3, 4, 3, 2) };
             this.chkAllRing.CheckedChanged += this.OnAllRingChanged;
             this.lstCells = new CheckedListBox { Dock = DockStyle.Fill, CheckOnClick = true, Enabled = false,
-                Height = 70, IntegralHeight = false, Margin = new Padding(3, 2, 3, 4) };
+                Height = 170, IntegralHeight = false, Margin = new Padding(3, 2, 3, 4) };
             this.chkForce = new CheckBox { Text = "Remplissage forcé (purge des aimants présents, puis repose)",
                 AutoSize = true, Margin = new Padding(3, 4, 3, 2) };
+            // Ligne « Cellules à remplir : » + boutons Tout cocher / décocher (évite scroll & clics multiples)
+            var cellHeader = new FlowLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                WrapContents = false, Margin = new Padding(0), FlowDirection = FlowDirection.LeftToRight, Dock = DockStyle.Fill };
+            cellHeader.Controls.Add(new Label { Text = "Cellules à remplir :", AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(3, 8, 12, 0) });
+            this.btnCheckAll = new Button { Text = "Tout cocher", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Enabled = false, Margin = new Padding(0, 3, 4, 0), Padding = new Padding(4, 1, 4, 1) };
+            this.btnCheckAll.Click += this.OnCheckAll;
+            this.btnUncheckAll = new Button { Text = "Tout décocher", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Enabled = false, Margin = new Padding(0, 3, 0, 0), Padding = new Padding(4, 1, 4, 1) };
+            this.btnUncheckAll.Click += this.OnUncheckAll;
+            cellHeader.Controls.Add(this.btnCheckAll);
+            cellHeader.Controls.Add(this.btnUncheckAll);
             gp.Controls.Add(this.chkAllRing, 0, 0);
-            gp.Controls.Add(Lbl("Cellules à remplir :"), 0, 1);
+            gp.Controls.Add(cellHeader, 0, 1);
             gp.Controls.Add(this.lstCells, 0, 2);
             gp.Controls.Add(this.chkForce, 0, 3);
             gbScope.Controls.Add(gp);
@@ -173,8 +184,8 @@ namespace ThreeDBuilder
             // =================== Form ===================
             this.AutoScaleMode = AutoScaleMode.Dpi; // mise à l'échelle uniforme selon le DPI de la session NX
             this.Font = new Font("Segoe UI", 9F);
-            this.ClientSize = new Size(600, 780);
-            this.MinimumSize = new Size(560, 700);
+            this.ClientSize = new Size(600, 860);
+            this.MinimumSize = new Size(560, 720);
             this.Controls.Add(root);
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.MaximizeBox = false; this.MinimizeBox = false;

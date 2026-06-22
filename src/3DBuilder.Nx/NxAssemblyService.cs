@@ -85,14 +85,37 @@ namespace ThreeDBuilder.Nx
             var root = _ctx.StorageRing.ComponentAssembly.RootComponent;
             if (root == null) return cells;
 
+            var seen = new Dictionary<string, int>(StringComparer.Ordinal);
             foreach (var child in root.GetChildren())
             {
-                var cell = new NxCell { Name = child.DisplayName, Root = child };
+                var name = ResolveCellName(child);
+                // Garantit des noms UNIQUES (sinon la conservation de sélection et le scope ne peuvent
+                // pas distinguer deux cellules homonymes).
+                int k;
+                if (seen.TryGetValue(name, out k)) { seen[name] = k + 1; name = name + " #" + (k + 1); }
+                else seen[name] = 1;
+
+                var cell = new NxCell { Name = name, Root = child };
                 foreach (var ens in FindDescendants(child, EnsembleToken))
                     cell.MagnetAssemblies.Add(BuildMagnetAssembly(ens));
                 cells.Add(cell);
             }
             return cells;
+        }
+
+        /// <summary>
+        /// Nom lisible d'une cellule. DisplayName retombe parfois sur un libellé générique (ex. le
+        /// dossier en natif) → on privilégie le nom d'instance puis le leaf du prototype (nom de pièce).
+        /// </summary>
+        private static string ResolveCellName(Assemblies.Component cell)
+        {
+            var inst = cell.Name;
+            if (!string.IsNullOrWhiteSpace(inst)) return inst.Trim();
+            var proto = cell.Prototype as Part;
+            if (proto != null && !string.IsNullOrWhiteSpace(proto.Leaf)) return proto.Leaf.Trim();
+            if (proto != null && !string.IsNullOrWhiteSpace(proto.Name)) return FirstSegment(proto.Name);
+            var dn = cell.DisplayName;
+            return string.IsNullOrWhiteSpace(dn) ? "Cellule" : dn.Trim();
         }
 
         private NxMagnetAssembly BuildMagnetAssembly(Assemblies.Component ensemble)
