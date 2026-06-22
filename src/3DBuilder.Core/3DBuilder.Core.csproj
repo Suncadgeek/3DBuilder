@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>ThreeDBuilder.Core</RootNamespace>
+    <AssemblyName>3DBuilder.Core</AssemblyName>
+  </PropertyGroup>
+
+  <!--
+    Couche métier pure : AUCUNE dépendance NXOpen ni WinForms.
+    Lecture Excel via ClosedXML (pas besoin d'Excel installé).
+  -->
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.3" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+</Project>
