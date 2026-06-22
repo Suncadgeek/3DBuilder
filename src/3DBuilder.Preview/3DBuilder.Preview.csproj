@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Lanceur d'APERÇU de l'UI uniquement (hors déploiement, absent de 3DBuilderCS.sln).
+    Ouvre la MainForm sur Windows sans NX, pour itérer la mise en page sans recharger l'add-in.
+    La fenêtre ne touche NX qu'au clic « Analyser » (NxContext créé à ce moment) ; tant qu'on ne
+    clique pas, aucun appel NXOpen → s'exécute hors session NX.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>ThreeDBuilder.Preview</RootNamespace>
+    <AssemblyName>3DBuilder.Preview</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\3DBuilder\3DBuilder.csproj" />
+  </ItemGroup>
+
+</Project>
