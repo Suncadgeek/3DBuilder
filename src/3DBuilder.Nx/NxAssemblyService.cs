@@ -53,12 +53,60 @@ namespace ThreeDBuilder.Nx
 
             theSession.Parts.LoadOptions.UsePartialLoading = false;
             PartLoadStatus pls;
+            // Managé : TC exige la révision dans la spec (@DB/<id>/<rev>) → on résout la dernière.
+            var spec = _ctx.TeamCenter ? ResolveManagedSpec(matchToken) : resolver.RingSpec();
+            _log.Info("Ouverture anneau : " + spec);
             var ring = (Part)theSession.Parts.OpenActiveDisplay(
-                resolver.RingSpec(), DisplayPartOption.AllowAdditional, out pls);
+                spec, DisplayPartOption.AllowAdditional, out pls);
             pls.Dispose();
             _ctx.StorageRing = ring;
             _ctx.RefreshParts();
             return ring;
+        }
+
+        /// <summary>
+        /// En managé, NX exige la révision (@DB/&lt;id&gt;/&lt;rev&gt;) — l'ouverture par item seul échoue
+        /// (« nom de fichier incorrect »). On liste les révisions TC de l'item et on retient la DERNIÈRE
+        /// (≈ dernière working). Les révisions trouvées et la révision retenue sont journalisées pour
+        /// vérification. Repli sur @DB/&lt;id&gt; si la résolution échoue.
+        /// </summary>
+        private string ResolveManagedSpec(string itemId)
+        {
+            var id = (itemId ?? "").Trim();
+            try
+            {
+                Tag itemTag;
+                _ctx.Uf.Ugmgr.AskPartTag(id, out itemTag);
+                if (itemTag == Tag.Null)
+                {
+                    _log.Warn("Item introuvable dans Teamcenter : " + id);
+                    return "@DB/" + id;
+                }
+
+                int count;
+                Tag[] revTags;
+                _ctx.Uf.Ugmgr.ListPartRevisions(itemTag, out count, out revTags);
+                if (revTags != null && revTags.Length > 0)
+                {
+                    var ids = new List<string>();
+                    foreach (var rt in revTags)
+                    {
+                        string rid;
+                        _ctx.Uf.Ugmgr.AskPartRevisionId(rt, out rid);
+                        ids.Add(rid);
+                    }
+                    _log.Info("Révisions de " + id + " : " + string.Join(", ", ids));
+                    var rev = ids[ids.Count - 1]; // dernière listée ≈ dernière révision (working)
+                    _log.Info("Révision retenue : " + rev);
+                    return "@DB/" + id + "/" + rev;
+                }
+                _log.Warn("Aucune révision listée pour " + id + ".");
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("Résolution de révision impossible pour " + id + " : " + ex.Message);
+            }
+            return "@DB/" + id;
         }
 
         /// <summary>Cherche une pièce déjà chargée dont le nom/leaf contient le jeton (réf TC ou nom de fichier).</summary>
@@ -162,7 +210,7 @@ namespace ThreeDBuilder.Nx
         {
             var theSession = _ctx.Session;
             PartLoadStatus pls;
-            var spec = resolver.MagnetSpec(tcRef);
+            var spec = _ctx.TeamCenter ? ResolveManagedSpec(tcRef) : resolver.MagnetSpec(tcRef);
             _log.Info("Ouverture aimant : " + spec);
             var part = (Part)theSession.Parts.OpenActiveDisplay(
                 spec, DisplayPartOption.AllowAdditional, out pls);
