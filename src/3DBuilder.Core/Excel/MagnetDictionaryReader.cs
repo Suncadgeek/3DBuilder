@@ -23,7 +23,10 @@ namespace ThreeDBuilder.Core.Excel
             if (!File.Exists(path))
                 throw new FileNotFoundException("Dictionnaire introuvable : " + path, path);
 
-            using (var wb = new XLWorkbook(path))
+            // Ouverture en lecture avec partage ReadWrite : permet de lire le dictionnaire MÊME s'il est
+            // déjà ouvert dans Excel (sinon l'ouverture exclusive bloque/échoue → add-in figé).
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var wb = new XLWorkbook(fs))
             {
                 var ws = wb.Worksheets.FirstOrDefault(s => string.Equals(s.Name, DefaultSheetName, StringComparison.OrdinalIgnoreCase))
                          ?? wb.Worksheets.First();

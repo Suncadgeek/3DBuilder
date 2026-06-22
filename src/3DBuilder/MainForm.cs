@@ -107,7 +107,7 @@ namespace ThreeDBuilder
             {
                 _log?.Error("Analyse impossible : " + ex.Message);
                 SetStatus("Analyse échouée : " + ex.Message, System.Drawing.Color.FromArgb(170, 40, 40));
-                MessageBox.Show(ex.Message, "Analyse", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this,ex.Message, "Analyse", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally { SetBusy(false); }
         }
@@ -115,12 +115,12 @@ namespace ThreeDBuilder
         // --- Phase 2 : Générer ---
         private void OnGenerate(object sender, EventArgs e)
         {
-            if (!_analyzed) { MessageBox.Show("Lance d'abord l'analyse.", "Générer"); return; }
+            if (!_analyzed) { MessageBox.Show(this,"Lance d'abord l'analyse.", "Générer"); return; }
             var cfg = ReadConfig();
 
             if (cfg.FillMode == FillMode.ForceRefill)
             {
-                var ok = MessageBox.Show(
+                var ok = MessageBox.Show(this,
                     "Remplissage FORCÉ : les composants aimants des cellules sélectionnées seront RETIRÉS "
                     + "(le squelette est conservé) avant d'être reposés. Continuer ?",
                     "Confirmation purge", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -144,14 +144,14 @@ namespace ThreeDBuilder
                           : summary.Failed > 0 ? System.Drawing.Color.FromArgb(170, 40, 40)
                           : System.Drawing.Color.FromArgb(40, 110, 40);
                 SetStatus((summary.Cancelled ? "Génération annulée — " : "Génération terminée — ") + msg, color);
-                MessageBox.Show(msg, "Terminé", MessageBoxButtons.OK,
+                MessageBox.Show(this,msg, "Terminé", MessageBoxButtons.OK,
                     summary.Failed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 _log.Error("Génération interrompue : " + ex.Message);
                 SetStatus("Génération interrompue : " + ex.Message, System.Drawing.Color.FromArgb(170, 40, 40));
-                MessageBox.Show(ex.Message, "Générer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this,ex.Message, "Générer", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally { btnCancel.Enabled = false; SetBusy(false); }
         }
