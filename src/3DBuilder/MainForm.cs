@@ -76,8 +76,14 @@ namespace ThreeDBuilder
                 var cfg = ReadConfig();
                 var result = _service.Analyze(cfg);
 
+                // Conserve la sélection en cas de réanalyse (ex. après mise à jour du dico) :
+                // au 1er passage tout est coché ; ensuite on restaure l'état coché par nom.
+                var prevChecked = new System.Collections.Generic.HashSet<string>(
+                    lstCells.CheckedItems.Cast<object>().Select(o => o.ToString()), StringComparer.Ordinal);
+                bool hadItems = lstCells.Items.Count > 0;
                 lstCells.Items.Clear();
-                foreach (var name in result.CellNames) lstCells.Items.Add(name, true);
+                foreach (var name in result.CellNames)
+                    lstCells.Items.Add(name, !hadItems || prevChecked.Contains(name));
 
                 AppendReport(result.Report);
                 _analyzed = true;
