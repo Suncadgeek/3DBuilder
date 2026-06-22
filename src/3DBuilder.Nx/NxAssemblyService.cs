@@ -166,9 +166,10 @@ namespace ThreeDBuilder.Nx
             var proto = cell.Prototype as Part;
             var candidates = new[]
             {
-                proto != null ? proto.Leaf : null, // natif : nom de fichier
-                cell.Name,                          // nom d'instance
-                cell.DisplayName                    // managé : nom descriptif (navigateur)
+                DescriptionFromProtoName(proto != null ? proto.Name : null), // managé : DB_PART_NAME après "<id>/<rev>-"
+                proto != null ? proto.Leaf : null,                            // natif : nom de fichier
+                cell.Name,
+                cell.DisplayName
             };
             // 1er candidat lisible qui n'est PAS une réf TC (CAO…)
             foreach (var c in candidates)
@@ -178,6 +179,20 @@ namespace ThreeDBuilder.Nx
             foreach (var c in candidates)
                 if (!string.IsNullOrWhiteSpace(c)) return c.Trim();
             return "Cellule";
+        }
+
+        /// <summary>
+        /// Extrait le nom descriptif (DB_PART_NAME) d'un nom de pièce managé au format
+        /// « &lt;id&gt;/&lt;rev&gt;-&lt;DB_PART_NAME&gt; » (ex. « CAO000172334/AA-V1001_AN01-AR » → « V1001_AN01-AR »).
+        /// Renvoie null si le format ne correspond pas (ex. nom de fichier natif).
+        /// </summary>
+        private static string DescriptionFromProtoName(string protoName)
+        {
+            if (string.IsNullOrWhiteSpace(protoName)) return null;
+            int slash = protoName.IndexOf('/');
+            int dash = protoName.IndexOf('-');
+            if (slash >= 0 && dash > slash) return protoName.Substring(dash + 1).Trim();
+            return null;
         }
 
         private NxMagnetAssembly BuildMagnetAssembly(Assemblies.Component ensemble)

@@ -208,9 +208,9 @@ namespace ThreeDBuilder
             {
                 switch (f.Severity)
                 {
-                    case PreflightSeverity.Error: _log.Error(f.ToString()); break;
-                    case PreflightSeverity.Warning: _log.Warn(f.ToString()); break;
-                    default: _log.Info(f.ToString()); break;
+                    case PreflightSeverity.Error: _log.Error(f.Message); break;
+                    case PreflightSeverity.Warning: _log.Warn(f.Message); break;
+                    default: _log.Info(f.Message); break;
                 }
             }
             _log.Info($"→ {report.TotalToAdd} aimant(s) à poser sur le scope.");

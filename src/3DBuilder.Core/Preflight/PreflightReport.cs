@@ -47,12 +47,21 @@ namespace ThreeDBuilder.Core.Preflight
             Detail = detail;
         }
 
+        /// <summary>Message sans le tag de sévérité (pour routage via un journal qui ajoute déjà le tag).</summary>
+        public string Message
+        {
+            get
+            {
+                var loc = string.IsNullOrEmpty(Cell) ? "" : "[" + Cell + "] ";
+                return $"{loc}{Category}: {Detail}";
+            }
+        }
+
         public override string ToString()
         {
             var tag = Severity == PreflightSeverity.Error ? "ERREUR"
                     : Severity == PreflightSeverity.Warning ? "AVERT." : "INFO";
-            var loc = string.IsNullOrEmpty(Cell) ? "" : "[" + Cell + "] ";
-            return $"[{tag}] {loc}{Category}: {Detail}";
+            return $"[{tag}] {Message}";
         }
     }
 
