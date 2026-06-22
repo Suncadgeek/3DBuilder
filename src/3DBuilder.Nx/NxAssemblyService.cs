@@ -1,0 +1,215 @@
+using System;
+using System.Collections.Generic;
+using NXOpen;
+using ThreeDBuilder.Core;
+using Assemblies = NXOpen.Assemblies;
+
+namespace ThreeDBuilder.Nx
+{
+    /// <summary>
+    /// Adapter NXOpen pour le remplissage : ouverture de l'anneau, parcours des cellules / Ensembles
+    /// Aimants, lecture des aimants déjà posés, ajout et purge de composants. Porte les routines VB
+    /// Outline / Open_Parts / Import_Magnets (partie assemblage) en services isolés.
+    ///
+    /// La traversée identifie les sous-produits par NOM (« _AIMANTS » / « _SQL ») plutôt que par index
+    /// fixe (GetChildren(1).GetChildren(0) du VB) — corrige la fragilité du constat n°4.
+    /// </summary>
+    public sealed class NxAssemblyService
+    {
+        public const string EnsembleToken = "AIMANTS";
+        public const string SkeletonToken = "SQL";
+
+        private readonly NxContext _ctx;
+        private readonly IBuildLog _log;
+
+        public NxAssemblyService(NxContext ctx, IBuildLog log)
+        {
+            _ctx = ctx;
+            _log = log ?? NullBuildLog.Instance;
+        }
+
+        // ------------------------------------------------------------------
+        // Ouverture de l'anneau (ex-Outline début).
+        // ------------------------------------------------------------------
+        public Part OpenStorageRing(IPartResolver resolver)
+        {
+            var theSession = _ctx.Session;
+            theSession.Parts.LoadOptions.UsePartialLoading = false;
+            PartLoadStatus pls;
+            var ring = (Part)theSession.Parts.OpenActiveDisplay(
+                resolver.RingSpec(), DisplayPartOption.AllowAdditional, out pls);
+            pls.Dispose();
+            _ctx.StorageRing = ring;
+            _ctx.RefreshParts();
+            return ring;
+        }
+
+        // ------------------------------------------------------------------
+        // Énumération des cellules (enfants directs de la racine) + leurs Ensembles Aimants.
+        // ------------------------------------------------------------------
+        public IReadOnlyList<NxCell> EnumerateCells()
+        {
+            var cells = new List<NxCell>();
+            var root = _ctx.StorageRing.ComponentAssembly.RootComponent;
+            if (root == null) return cells;
+
+            foreach (var child in root.GetChildren())
+            {
+                var cell = new NxCell { Name = child.DisplayName, Root = child };
+                foreach (var ens in FindDescendants(child, EnsembleToken))
+                    cell.MagnetAssemblies.Add(BuildMagnetAssembly(ens));
+                cells.Add(cell);
+            }
+            return cells;
+        }
+
+        private NxMagnetAssembly BuildMagnetAssembly(Assemblies.Component ensemble)
+        {
+            var a = new NxMagnetAssembly
+            {
+                Ensemble = ensemble,
+                EnsemblePart = ensemble.Prototype as Part
+            };
+            foreach (var sub in ensemble.GetChildren())
+            {
+                if (NameContains(sub, SkeletonToken))
+                {
+                    a.Skeleton = sub;
+                    a.SkeletonPart = sub.Prototype as Part;
+                    break;
+                }
+            }
+            return a;
+        }
+
+        /// <summary>Réfs TC des aimants déjà posés dans un Ensemble Aimants (tout sauf le squelette).</summary>
+        public IReadOnlyList<string> GetPlacedMagnetTcRefs(NxMagnetAssembly assembly)
+        {
+            var refs = new List<string>();
+            if (assembly?.Ensemble == null) return refs;
+            foreach (var sub in assembly.Ensemble.GetChildren())
+            {
+                if (assembly.Skeleton != null && ReferenceEquals(sub, assembly.Skeleton)) continue;
+                if (NameContains(sub, SkeletonToken)) continue; // sécurité
+                var proto = sub.Prototype as Part;
+                var name = proto != null ? proto.Name : sub.DisplayName;
+                refs.Add(FirstSegment(name));
+            }
+            return refs;
+        }
+
+        // ------------------------------------------------------------------
+        // Ouverture d'une pièce aimant (la charge dans la session pour l'ajout).
+        // ------------------------------------------------------------------
+        public Part OpenMagnetPart(IPartResolver resolver, string tcRef)
+        {
+            var theSession = _ctx.Session;
+            PartLoadStatus pls;
+            var part = (Part)theSession.Parts.OpenActiveDisplay(
+                resolver.MagnetSpec(tcRef), DisplayPartOption.AllowAdditional, out pls);
+            pls.Dispose();
+            _ctx.RefreshParts();
+            return part;
+        }
+
+        // ------------------------------------------------------------------
+        // Ajout d'un aimant comme composant dans l'Ensemble Aimants (ex-Import_Magnets, bloc add).
+        // ------------------------------------------------------------------
+        public Assemblies.Component AddMagnet(NxMagnetAssembly assembly, Part magnetPart)
+        {
+            var theSession = _ctx.Session;
+            PartLoadStatus pls;
+
+            theSession.Parts.SetActiveDisplay(_ctx.StorageRing, DisplayPartOption.AllowAdditional,
+                PartDisplayPartWorkPartOption.UseLast, out pls);
+            _ctx.RefreshParts();
+            pls.Dispose();
+
+            theSession.Parts.SetWorkComponent(assembly.Ensemble, PartCollection.RefsetOption.Entire,
+                PartCollection.WorkComponentOption.Visible, out pls);
+            _ctx.RefreshParts();
+            pls.Dispose();
+
+            var acb = assembly.EnsemblePart.AssemblyManager.CreateAddComponentBuilder();
+            try
+            {
+                acb.ReferenceSet = "MODEL";
+                acb.SetPartsToAdd(new Part[] { magnetPart });
+                var committed = acb.Commit();
+                return (Assemblies.Component)committed;
+            }
+            finally
+            {
+                acb.Destroy();
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Purge des aimants d'un Ensemble Aimants (mode forcé n°1) — le squelette est CONSERVÉ.
+        // ------------------------------------------------------------------
+        public int PurgeMagnets(NxMagnetAssembly assembly)
+        {
+            var theSession = _ctx.Session;
+            var toDelete = new List<TaggedObject>();
+            foreach (var sub in assembly.Ensemble.GetChildren())
+            {
+                if (assembly.Skeleton != null && ReferenceEquals(sub, assembly.Skeleton)) continue;
+                if (NameContains(sub, SkeletonToken)) continue;
+                toDelete.Add(sub);
+            }
+            if (toDelete.Count == 0) return 0;
+
+            var markId = theSession.SetUndoMark(Session.MarkVisibility.Visible, "Purge aimants");
+            theSession.UpdateManager.ClearErrorList();
+            theSession.UpdateManager.AddObjectsToDeleteList(toDelete.ToArray());
+            theSession.UpdateManager.DoUpdate(markId);
+            return toDelete.Count;
+        }
+
+        // ------------------------------------------------------------------
+        // Retour de la pièce de travail sur la racine de l'anneau (ex-Outline fin).
+        // ------------------------------------------------------------------
+        public void SetWorkToRoot()
+        {
+            var theSession = _ctx.Session;
+            PartLoadStatus pls;
+            Assemblies.Component nullComp = null;
+            theSession.Parts.SetWorkComponent(nullComp, PartCollection.RefsetOption.Entire,
+                PartCollection.WorkComponentOption.Visible, out pls);
+            pls.Dispose();
+            _ctx.RefreshParts();
+        }
+
+        // ------------------------------------------------------------------
+        // Helpers
+        // ------------------------------------------------------------------
+        private IEnumerable<Assemblies.Component> FindDescendants(Assemblies.Component root, string token)
+        {
+            foreach (var child in root.GetChildren())
+            {
+                if (NameContains(child, token))
+                    yield return child;
+                else
+                    foreach (var d in FindDescendants(child, token))
+                        yield return d;
+            }
+        }
+
+        private static bool NameContains(Assemblies.Component comp, string token)
+        {
+            if (comp == null) return false;
+            var dn = comp.DisplayName ?? "";
+            if (dn.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            var proto = comp.Prototype as Part;
+            var pn = proto != null ? proto.Name : "";
+            return pn.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string FirstSegment(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return "";
+            int slash = name.IndexOf('/');
+            return slash >= 0 ? name.Substring(0, slash) : name;
+        }
+    }
+}
