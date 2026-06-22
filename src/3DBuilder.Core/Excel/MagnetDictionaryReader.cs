@@ -41,8 +41,11 @@ namespace ThreeDBuilder.Core.Excel
             {
                 foreach (var row in used.RowsUsed())
                 {
-                    var tcRef = row.Cell(1).GetString();
-                    var code = row.Cell(2).GetString();
+                    // Colonnes ABSOLUES A (réf TC) et B (code), indépendamment de l'offset de RangeUsed
+                    // (row.Cell(1) serait relatif à la plage → lecture de la mauvaise colonne si décalée).
+                    int r = row.RowNumber();
+                    var tcRef = ws.Cell(r, 1).GetString();
+                    var code = ws.Cell(r, 2).GetString();
                     rows.Add(new KeyValuePair<string, string>(tcRef, code));
                 }
             }

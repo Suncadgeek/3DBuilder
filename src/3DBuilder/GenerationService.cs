@@ -164,12 +164,12 @@ namespace ThreeDBuilder
                                 var comp = _assembly.AddMagnet(asm, magnetPart);
                                 var outcome = _constraints.Constrain(asm.Skeleton, comp, asm.EnsemblePart, mount.CsysFeatureName);
                                 if (outcome.Ok) summary.Added++;
-                                else { summary.Failed++; summary.Failures.Add($"[{cell.Name}] {mount.Code} : {outcome.Error}"); }
+                                else { summary.Failed++; summary.Failures.Add($"[{cell.Name}] {mount.Code} (réf {tcRef}) : {outcome.Error}"); }
                             }
                             catch (Exception ex)
                             {
                                 summary.Failed++;
-                                summary.Failures.Add($"[{cell.Name}] {mount.Code} : {ex.Message}");
+                                summary.Failures.Add($"[{cell.Name}] {mount.Code} (réf {tcRef}) : {ex.Message}");
                             }
                         }
                         if (summary.Cancelled) break;

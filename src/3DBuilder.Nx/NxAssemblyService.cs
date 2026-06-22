@@ -162,8 +162,10 @@ namespace ThreeDBuilder.Nx
         {
             var theSession = _ctx.Session;
             PartLoadStatus pls;
+            var spec = resolver.MagnetSpec(tcRef);
+            _log.Info("Ouverture aimant : " + spec);
             var part = (Part)theSession.Parts.OpenActiveDisplay(
-                resolver.MagnetSpec(tcRef), DisplayPartOption.AllowAdditional, out pls);
+                spec, DisplayPartOption.AllowAdditional, out pls);
             pls.Dispose();
             _ctx.RefreshParts();
             return part;
