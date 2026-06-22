@@ -64,9 +64,10 @@ namespace ThreeDBuilder
             this.SuspendLayout();
 
             // racine : 1 colonne de LARGEUR FIXE (les Dock=Fill internes ont alors une vraie largeur),
-            // toutes les lignes en AutoSize. La fenêtre s'auto-dimensionne autour → rien ne se replie.
+            // toutes les lignes en AutoSize. PAS de Dock : root se dimensionne à son contenu (colonne
+            // 548 + marges) et la fenêtre AutoSize l'enveloppe → largeur correcte, rien ne se replie.
             var root = new TableLayoutPanel { ColumnCount = 1, AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink, Dock = DockStyle.Top, Padding = new Padding(10) };
+                AutoSizeMode = AutoSizeMode.GrowAndShrink, Location = new Point(0, 0), Padding = new Padding(10) };
             root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, ContentW));
 
             // =================== Source ===================
@@ -121,7 +122,7 @@ namespace ThreeDBuilder
             cellHeader.Controls.Add(this.btnCheckAll);
             cellHeader.Controls.Add(this.btnUncheckAll);
             this.lstCells = new CheckedListBox { Dock = DockStyle.Fill, CheckOnClick = true, Enabled = false,
-                Height = 170, IntegralHeight = false, Margin = new Padding(3, 2, 3, 4) };
+                Height = 130, IntegralHeight = false, Margin = new Padding(3, 2, 3, 4) };
             this.chkForce = new CheckBox { Text = "Remplissage forcé (purge des aimants présents, puis repose)",
                 AutoSize = true, Margin = new Padding(3, 4, 3, 2) };
             gp.Controls.Add(this.chkAllRing, 0, 0);
@@ -157,7 +158,7 @@ namespace ThreeDBuilder
             gj.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             gj.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             gj.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            gj.RowStyles.Add(new RowStyle(SizeType.Absolute, 180)); // hauteur de log FIXE → toujours visible
+            gj.RowStyles.Add(new RowStyle(SizeType.Absolute, 150)); // hauteur de log FIXE → toujours visible
             var logRow = HRow();
             this.cboLogLevel = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 170, Margin = new Padding(8, 3, 3, 3) };
             this.cboLogLevel.Items.AddRange(new object[] { "Info", "Avertissements", "Erreurs" });
@@ -182,14 +183,19 @@ namespace ThreeDBuilder
             root.Controls.Add(this.lblStatus, 0, 4);
             root.Controls.Add(gbJournal, 0, 5);
 
+            // Conteneur défilant : si le contenu (à fort DPI) dépasse la fenêtre, un ascenseur apparaît
+            // → tout reste atteignable, jamais de chevauchement ni de repli. root garde sa largeur fixe.
+            var scroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
+            scroll.Controls.Add(root);
+
             // =================== Form ===================
             this.AutoScaleMode = AutoScaleMode.Dpi;
             this.Font = new Font("Segoe UI", 9F);
-            this.AutoSize = true;
-            this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            this.Controls.Add(root);
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false; this.MinimizeBox = false;
+            this.ClientSize = new Size(596, 808);
+            this.MinimumSize = new Size(590, 460);
+            this.Controls.Add(scroll);
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.MaximizeBox = true; this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "3DBuilder — assemblage des aimants";
             this.TopMost = true;
