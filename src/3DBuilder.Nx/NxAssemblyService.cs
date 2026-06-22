@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NXOpen;
 using ThreeDBuilder.Core;
 using Assemblies = NXOpen.Assemblies;
@@ -157,15 +158,26 @@ namespace ThreeDBuilder.Nx
         /// Nom lisible d'une cellule. DisplayName retombe parfois sur un libellé générique (ex. le
         /// dossier en natif) → on privilégie le nom d'instance puis le leaf du prototype (nom de pièce).
         /// </summary>
+        // Réf TC « CAOnnnnnnnnn » (éventuellement suffixée /rev) : à éviter comme nom de cellule.
+        private static readonly Regex TcRefPattern = new Regex(@"^CAO\d+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static string ResolveCellName(Assemblies.Component cell)
         {
-            var inst = cell.Name;
-            if (!string.IsNullOrWhiteSpace(inst)) return inst.Trim();
             var proto = cell.Prototype as Part;
-            if (proto != null && !string.IsNullOrWhiteSpace(proto.Leaf)) return proto.Leaf.Trim();
-            if (proto != null && !string.IsNullOrWhiteSpace(proto.Name)) return FirstSegment(proto.Name);
-            var dn = cell.DisplayName;
-            return string.IsNullOrWhiteSpace(dn) ? "Cellule" : dn.Trim();
+            var candidates = new[]
+            {
+                proto != null ? proto.Leaf : null, // natif : nom de fichier
+                cell.Name,                          // nom d'instance
+                cell.DisplayName                    // managé : nom descriptif (navigateur)
+            };
+            // 1er candidat lisible qui n'est PAS une réf TC (CAO…)
+            foreach (var c in candidates)
+                if (!string.IsNullOrWhiteSpace(c) && !TcRefPattern.IsMatch(c.Trim()))
+                    return c.Trim();
+            // sinon, 1er non vide (réf TC en dernier recours)
+            foreach (var c in candidates)
+                if (!string.IsNullOrWhiteSpace(c)) return c.Trim();
+            return "Cellule";
         }
 
         private NxMagnetAssembly BuildMagnetAssembly(Assemblies.Component ensemble)
