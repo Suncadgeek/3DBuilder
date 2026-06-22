@@ -22,6 +22,7 @@ namespace ThreeDBuilder
         private Label lblCells; private CheckedListBox lstCells;
         private CheckBox chkForce;
         private Button btnAnalyze; private Button btnGenerate; private Button btnCancel;
+        private Label lblLogLevel; private ComboBox cboLogLevel;
         private ProgressBar progressBar;
         private TextBox txtLog;
 
@@ -36,6 +37,7 @@ namespace ThreeDBuilder
             this.lblCells = new Label(); this.lstCells = new CheckedListBox();
             this.chkForce = new CheckBox();
             this.btnAnalyze = new Button(); this.btnGenerate = new Button(); this.btnCancel = new Button();
+            this.lblLogLevel = new Label(); this.cboLogLevel = new ComboBox();
             this.progressBar = new ProgressBar();
             this.txtLog = new TextBox();
             this.SuspendLayout();
@@ -93,6 +95,14 @@ namespace ThreeDBuilder
             this.btnCancel.Location = new Point(356, 296); this.btnCancel.Size = new Size(100, 24);
             this.btnCancel.Text = "Annuler"; this.btnCancel.Enabled = false; this.btnCancel.Click += this.OnCancel;
 
+            // Filtre niveau de journal
+            this.lblLogLevel.AutoSize = true; this.lblLogLevel.Location = new Point(250, 300); this.lblLogLevel.Text = "Niveau journal :";
+            this.cboLogLevel.Location = new Point(250, 318); this.cboLogLevel.Size = new Size(106, 21);
+            this.cboLogLevel.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cboLogLevel.Items.AddRange(new object[] { "Info", "Avertissements", "Erreurs" });
+            this.cboLogLevel.SelectedIndex = 0;
+            this.cboLogLevel.SelectedIndexChanged += this.OnLogLevelChanged;
+
             // Progression + journal
             this.progressBar.Location = new Point(12, 372); this.progressBar.Size = new Size(456, 18);
             this.progressBar.Maximum = 1000;
@@ -112,6 +122,7 @@ namespace ThreeDBuilder
             this.Controls.Add(this.lblCells); this.Controls.Add(this.lstCells);
             this.Controls.Add(this.chkForce);
             this.Controls.Add(this.btnAnalyze); this.Controls.Add(this.btnGenerate); this.Controls.Add(this.btnCancel);
+            this.Controls.Add(this.lblLogLevel); this.Controls.Add(this.cboLogLevel);
             this.Controls.Add(this.progressBar); this.Controls.Add(this.txtLog);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false; this.MinimizeBox = false;

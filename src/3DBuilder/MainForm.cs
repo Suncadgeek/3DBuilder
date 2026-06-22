@@ -20,6 +20,7 @@ namespace ThreeDBuilder
         public MainForm()
         {
             InitializeComponent();
+            _log = new UiBuildLog(txtLog, progressBar);
             Load += OnLoad;
             FormClosing += OnClosingSave;
         }
@@ -58,7 +59,7 @@ namespace ThreeDBuilder
             {
                 SetBusy(true);
                 progressBar.Value = 0;
-                _log = new UiBuildLog(txtLog, progressBar);
+                _log.Clear();
                 if (_service == null) _service = new GenerationService(new NxContext(), _log);
 
                 var cfg = ReadConfig();
@@ -141,6 +142,10 @@ namespace ThreeDBuilder
         }
         private void OnModeChanged(object sender, EventArgs e) => UpdateNativeFieldsEnabled();
         private void OnAllRingChanged(object sender, EventArgs e) => lstCells.Enabled = !chkAllRing.Checked;
+        private void OnLogLevelChanged(object sender, EventArgs e)
+        {
+            if (_log != null) _log.MinLevel = cboLogLevel.SelectedIndex;
+        }
 
         private void UpdateNativeFieldsEnabled()
         {
@@ -152,9 +157,17 @@ namespace ThreeDBuilder
 
         private void AppendReport(PreflightReport report)
         {
-            txtLog.AppendText("──── Rapport preflight ────" + Environment.NewLine);
-            foreach (var f in report.Findings) txtLog.AppendText(f.ToString() + Environment.NewLine);
-            txtLog.AppendText($"→ {report.TotalToAdd} aimant(s) à poser sur le scope." + Environment.NewLine);
+            _log.Info("──── Rapport preflight ────");
+            foreach (var f in report.Findings)
+            {
+                switch (f.Severity)
+                {
+                    case PreflightSeverity.Error: _log.Error(f.ToString()); break;
+                    case PreflightSeverity.Warning: _log.Warn(f.ToString()); break;
+                    default: _log.Info(f.ToString()); break;
+                }
+            }
+            _log.Info($"→ {report.TotalToAdd} aimant(s) à poser sur le scope.");
         }
 
         private void SetBusy(bool busy)

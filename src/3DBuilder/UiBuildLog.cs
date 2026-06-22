@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Windows.Forms;
 using ThreeDBuilder.Core;
 
@@ -6,13 +8,22 @@ namespace ThreeDBuilder
 {
     /// <summary>
     /// Implémentation WinForms d'<see cref="IBuildLog"/> : journalise dans la zone de texte et pilote
-    /// la barre de progression. DoEvents garde l'UI réactive (NX est mono-thread STA → pas de vrai
-    /// background thread ; le bouton Annuler est traité via le pompage d'événements).
+    /// la barre de progression. Mémorise toutes les entrées et ne réaffiche que celles dont le niveau
+    /// est ≥ <see cref="MinLevel"/> (filtre de niveau de log). DoEvents garde l'UI réactive (NX est
+    /// mono-thread STA → le bouton Annuler est traité via le pompage d'événements).
     /// </summary>
     public sealed class UiBuildLog : IBuildLog
     {
+        public const int LevelInfo = 0;
+        public const int LevelWarn = 1;
+        public const int LevelError = 2;
+
+        private static readonly string[] Tags = { "INFO", "AVERT.", "ERREUR" };
+
         private readonly TextBox _log;
         private readonly ProgressBar _bar;
+        private readonly List<KeyValuePair<int, string>> _entries = new List<KeyValuePair<int, string>>();
+        private int _minLevel = LevelInfo;
 
         public UiBuildLog(TextBox log, ProgressBar bar)
         {
@@ -20,9 +31,16 @@ namespace ThreeDBuilder
             _bar = bar;
         }
 
-        public void Info(string message) => Write("INFO", message);
-        public void Warn(string message) => Write("AVERT.", message);
-        public void Error(string message) => Write("ERREUR", message);
+        /// <summary>Niveau minimal affiché (0=Info, 1=Avert., 2=Erreur). Réaffiche en cas de changement.</summary>
+        public int MinLevel
+        {
+            get { return _minLevel; }
+            set { _minLevel = value; Rerender(); }
+        }
+
+        public void Info(string message) => Add(LevelInfo, message);
+        public void Warn(string message) => Add(LevelWarn, message);
+        public void Error(string message) => Add(LevelError, message);
 
         public void Progress(int current, int total)
         {
@@ -32,11 +50,33 @@ namespace ThreeDBuilder
             Application.DoEvents();
         }
 
-        private void Write(string level, string message)
+        /// <summary>Vide le journal (entrées + affichage) — appelé au début d'une nouvelle analyse.</summary>
+        public void Clear()
+        {
+            _entries.Clear();
+            if (_log != null) _log.Clear();
+        }
+
+        private void Add(int level, string message)
+        {
+            _entries.Add(new KeyValuePair<int, string>(level, message));
+            if (_log != null && level >= _minLevel)
+            {
+                _log.AppendText("[" + Tags[level] + "] " + message + Environment.NewLine);
+                Application.DoEvents();
+            }
+        }
+
+        private void Rerender()
         {
             if (_log == null) return;
-            _log.AppendText("[" + level + "] " + message + Environment.NewLine);
-            Application.DoEvents();
+            var sb = new StringBuilder();
+            foreach (var e in _entries)
+                if (e.Key >= _minLevel)
+                    sb.Append("[" + Tags[e.Key] + "] ").Append(e.Value).Append(Environment.NewLine);
+            _log.Text = sb.ToString();
+            _log.SelectionStart = _log.TextLength;
+            _log.ScrollToCaret();
         }
     }
 }

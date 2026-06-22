@@ -31,9 +31,26 @@ namespace ThreeDBuilder.Nx
         // ------------------------------------------------------------------
         // Ouverture de l'anneau (ex-Outline début).
         // ------------------------------------------------------------------
-        public Part OpenStorageRing(IPartResolver resolver)
+        public Part OpenStorageRing(IPartResolver resolver, string matchToken)
         {
             var theSession = _ctx.Session;
+
+            // Si l'anneau est DÉJÀ ouvert (ex. réanalyse après mise à jour du dico, sans fermer la
+            // pièce), on le réutilise au lieu de tenter une réouverture. Remplace le garde « aucune
+            // pièce ouverte → abandon » du VB, trop strict.
+            var existing = FindLoadedPart(matchToken);
+            if (existing != null)
+            {
+                PartLoadStatus plsReuse;
+                theSession.Parts.SetActiveDisplay(existing, DisplayPartOption.AllowAdditional,
+                    PartDisplayPartWorkPartOption.UseLast, out plsReuse);
+                plsReuse.Dispose();
+                _ctx.StorageRing = existing;
+                _ctx.RefreshParts();
+                _log.Info("Anneau déjà ouvert : réutilisé sans réouverture.");
+                return existing;
+            }
+
             theSession.Parts.LoadOptions.UsePartialLoading = false;
             PartLoadStatus pls;
             var ring = (Part)theSession.Parts.OpenActiveDisplay(
@@ -42,6 +59,21 @@ namespace ThreeDBuilder.Nx
             _ctx.StorageRing = ring;
             _ctx.RefreshParts();
             return ring;
+        }
+
+        /// <summary>Cherche une pièce déjà chargée dont le nom/leaf contient le jeton (réf TC ou nom de fichier).</summary>
+        private Part FindLoadedPart(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return null;
+            foreach (BasePart bp in _ctx.Session.Parts)
+            {
+                var p = bp as Part;
+                if (p == null) continue;
+                if ((p.Name ?? "").IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0
+                    || (p.Leaf ?? "").IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return p;
+            }
+            return null;
         }
 
         // ------------------------------------------------------------------

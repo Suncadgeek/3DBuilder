@@ -81,7 +81,10 @@ namespace ThreeDBuilder
             _log.Info($"Dictionnaire : {_dictionary.CodeToTcRef.Count} codes.");
 
             _log.Info("Ouverture de l'anneau : " + _resolver.RingSpec());
-            _assembly.OpenStorageRing(_resolver);
+            var ringToken = (mode == NxRunMode.Native)
+                ? System.IO.Path.GetFileNameWithoutExtension(config.NativeRingPath)
+                : config.StorageRingTcRef;
+            _assembly.OpenStorageRing(_resolver, ringToken);
             _cells = _assembly.EnumerateCells();
             _log.Info($"{_cells.Count} cellule(s) trouvée(s).");
 
