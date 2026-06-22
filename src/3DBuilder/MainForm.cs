@@ -20,9 +20,20 @@ namespace ThreeDBuilder
         public MainForm()
         {
             InitializeComponent();
+            LoadIcon();
             _log = new UiBuildLog(txtLog, progressBar);
             Load += OnLoad;
             FormClosing += OnClosingSave;
+        }
+
+        private void LoadIcon()
+        {
+            try
+            {
+                using (var s = GetType().Assembly.GetManifestResourceStream("ThreeDBuilder.Resources.ico.ico"))
+                    if (s != null) Icon = new System.Drawing.Icon(s);
+            }
+            catch { /* icône non bloquante */ }
         }
 
         private void OnLoad(object sender, EventArgs e)

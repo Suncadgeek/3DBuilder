@@ -165,7 +165,7 @@ namespace ThreeDBuilder.Nx
             var acb = assembly.EnsemblePart.AssemblyManager.CreateAddComponentBuilder();
             try
             {
-                acb.ReferenceSet = "MODEL";
+                acb.ReferenceSet = PreferredReferenceSet(magnetPart);
                 acb.SetPartsToAdd(new Part[] { magnetPart });
                 var committed = acb.Commit();
                 return (Assemblies.Component)committed;
@@ -235,6 +235,29 @@ namespace ThreeDBuilder.Nx
             var proto = comp.Prototype as Part;
             var pn = proto != null ? proto.Name : "";
             return pn.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// Ensemble de référence de l'aimant ajouté : « MODEL » par défaut (prod). Si la pièce n'a pas
+        /// de MODEL (cas des templates de test), on retombe sur « Entire Part » pour que la géométrie
+        /// reste visible plutôt qu'un composant vide. Les squelettes ont leurs propres règles (exclusion
+        /// du MODEL) côté SKBuilder — non concernés ici.
+        /// </summary>
+        private string PreferredReferenceSet(Part magnetPart)
+        {
+            const string Model = "MODEL";
+            const string Entire = "Entire Part";
+            try
+            {
+                var sets = magnetPart.GetAllReferenceSets();
+                if (sets != null)
+                    foreach (var rs in sets)
+                        if (rs != null && rs.Name == Model) return Model;
+            }
+            catch { /* ignore : on retombe sur Entire Part */ }
+            _log.Warn("Aimant sans ensemble de référence MODEL (" + (magnetPart.Leaf ?? magnetPart.Name)
+                      + ") → 'Entire Part'.");
+            return Entire;
         }
 
         private static string FirstSegment(string name)

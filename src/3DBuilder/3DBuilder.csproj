@@ -10,7 +10,14 @@
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>ThreeDBuilder</RootNamespace>
     <AssemblyName>3DBuilder</AssemblyName>
+    <ApplicationIcon>Resources\ico.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ico.ico">
+      <LogicalName>ThreeDBuilder.Resources.ico.ico</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\3DBuilder.Core\3DBuilder.Core.csproj" />
