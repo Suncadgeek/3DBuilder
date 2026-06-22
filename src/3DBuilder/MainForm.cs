@@ -71,6 +71,7 @@ namespace ThreeDBuilder
                 SetBusy(true);
                 progressBar.Value = 0;
                 _log.Clear();
+                SetStatus("Analyse en cours…", System.Drawing.Color.FromArgb(150, 90, 0));
                 if (_service == null) _service = new GenerationService(new NxContext(), _log);
 
                 var cfg = ReadConfig();
@@ -88,14 +89,24 @@ namespace ThreeDBuilder
                 AppendReport(result.Report);
                 _analyzed = true;
                 btnGenerate.Enabled = !result.Report.HasBlockingErrors;
+                progressBar.Value = progressBar.Maximum; // analyse terminée → barre pleine
                 if (result.Report.HasBlockingErrors)
+                {
                     _log.Error("Erreurs bloquantes : corrige le dictionnaire avant de générer.");
-                else if (result.Report.HasWarnings)
-                    _log.Warn("Des avertissements existent — la génération les ignorera (override implicite des aimants concernés).");
+                    SetStatus("Analyse terminée — erreurs bloquantes (génération impossible).", System.Drawing.Color.FromArgb(170, 40, 40));
+                }
+                else
+                {
+                    if (result.Report.HasWarnings)
+                        _log.Warn("Des avertissements existent — la génération les ignorera (override implicite des aimants concernés).");
+                    SetStatus($"Analyse terminée — {result.Report.TotalToAdd} aimant(s) à poser. Prêt à générer.",
+                        System.Drawing.Color.FromArgb(40, 110, 40));
+                }
             }
             catch (Exception ex)
             {
                 _log?.Error("Analyse impossible : " + ex.Message);
+                SetStatus("Analyse échouée : " + ex.Message, System.Drawing.Color.FromArgb(170, 40, 40));
                 MessageBox.Show(ex.Message, "Analyse", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally { SetBusy(false); }
@@ -121,6 +132,7 @@ namespace ThreeDBuilder
                 SetBusy(true);
                 _cancel = false;
                 btnCancel.Enabled = true;
+                SetStatus("Génération en cours…", System.Drawing.Color.FromArgb(150, 90, 0));
                 var summary = _service.Run(cfg, cfg.SelectedCells, cfg.FillMode, () => { Application.DoEvents(); return _cancel; });
 
                 if (summary.Failures.Count > 0)
@@ -128,12 +140,17 @@ namespace ThreeDBuilder
                 var msg = $"{summary.Added} aimant(s) posé(s), {summary.Failed} échec(s), {summary.SkippedMissing} sauté(s)"
                           + (summary.Cancelled ? " — ANNULÉ" : "") + ".";
                 _log.Info(msg);
+                var color = summary.Cancelled ? System.Drawing.Color.FromArgb(150, 90, 0)
+                          : summary.Failed > 0 ? System.Drawing.Color.FromArgb(170, 40, 40)
+                          : System.Drawing.Color.FromArgb(40, 110, 40);
+                SetStatus((summary.Cancelled ? "Génération annulée — " : "Génération terminée — ") + msg, color);
                 MessageBox.Show(msg, "Terminé", MessageBoxButtons.OK,
                     summary.Failed > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 _log.Error("Génération interrompue : " + ex.Message);
+                SetStatus("Génération interrompue : " + ex.Message, System.Drawing.Color.FromArgb(170, 40, 40));
                 MessageBox.Show(ex.Message, "Générer", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally { btnCancel.Enabled = false; SetBusy(false); }
@@ -203,6 +220,13 @@ namespace ThreeDBuilder
         {
             btnAnalyze.Enabled = !busy;
             Cursor = busy ? Cursors.WaitCursor : Cursors.Default;
+        }
+
+        private void SetStatus(string text, System.Drawing.Color color)
+        {
+            lblStatus.ForeColor = color;
+            lblStatus.Text = text;
+            Application.DoEvents();
         }
 
         private void OnClosingSave(object sender, FormClosingEventArgs e)

@@ -100,6 +100,8 @@ namespace ThreeDBuilder.Nx
                     cell.MagnetAssemblies.Add(BuildMagnetAssembly(ens));
                 cells.Add(cell);
             }
+            // L'arbre remonte les cellules en ordre inverse → on rétablit l'ordre naturel (01 en premier).
+            cells.Reverse();
             return cells;
         }
 
