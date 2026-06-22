@@ -45,36 +45,42 @@ namespace ThreeDBuilder
             this.txtLog = new TextBox();
             this.SuspendLayout();
 
+            // Largeurs communes
+            int gw = 560;            // largeur des group boxes
+            int fieldW = 416;        // largeur des champs texte
+            int browseX = 444;       // x des boutons Parcourir
+            int browseW = 110;
+
             // ----- GroupBox Source -----
-            this.gbSource.Text = "Source"; this.gbSource.Location = new Point(12, 8); this.gbSource.Size = new Size(480, 124);
-            this.lblDict.AutoSize = true; this.lblDict.Location = new Point(12, 22);
-            this.lblDict.Text = "Dictionnaire aimants (.xlsx — A = réf TC, B = code)";
-            this.txtDict.Location = new Point(14, 42); this.txtDict.Size = new Size(354, 23);
-            this.btnBrowseDict.Location = new Point(376, 41); this.btnBrowseDict.Size = new Size(92, 25);
+            this.gbSource.Text = "Source"; this.gbSource.Location = new Point(14, 10); this.gbSource.Size = new Size(gw, 134);
+            this.lblDict.AutoSize = true; this.lblDict.Location = new Point(16, 26);
+            this.lblDict.Text = "Dictionnaire aimants (.xlsx — colonne A = réf TC, colonne B = code)";
+            this.txtDict.Location = new Point(18, 48); this.txtDict.Size = new Size(fieldW, 23);
+            this.btnBrowseDict.Location = new Point(browseX, 47); this.btnBrowseDict.Size = new Size(browseW, 26);
             this.btnBrowseDict.Text = "Parcourir…"; this.btnBrowseDict.Click += this.OnBrowseDict;
-            this.lblRing.AutoSize = true; this.lblRing.Location = new Point(12, 74);
+            this.lblRing.AutoSize = true; this.lblRing.Location = new Point(16, 82);
             this.lblRing.Text = "Réf TC de l'anneau de stockage";
-            this.txtRing.Location = new Point(14, 94); this.txtRing.Size = new Size(220, 23);
+            this.txtRing.Location = new Point(18, 104); this.txtRing.Size = new Size(280, 23);
             this.gbSource.Controls.Add(this.lblDict); this.gbSource.Controls.Add(this.txtDict);
             this.gbSource.Controls.Add(this.btnBrowseDict); this.gbSource.Controls.Add(this.lblRing);
             this.gbSource.Controls.Add(this.txtRing);
 
             // ----- GroupBox Mode -----
-            this.gbMode.Text = "Mode d'exécution"; this.gbMode.Location = new Point(12, 140); this.gbMode.Size = new Size(480, 152);
-            this.lblMode.AutoSize = true; this.lblMode.Location = new Point(12, 25); this.lblMode.Text = "Mode :";
-            this.cboMode.Location = new Point(120, 22); this.cboMode.Size = new Size(150, 23);
+            this.gbMode.Text = "Mode d'exécution"; this.gbMode.Location = new Point(14, 156); this.gbMode.Size = new Size(gw, 174);
+            this.lblMode.AutoSize = true; this.lblMode.Location = new Point(16, 30); this.lblMode.Text = "Mode :";
+            this.cboMode.Location = new Point(120, 27); this.cboMode.Size = new Size(180, 23);
             this.cboMode.DropDownStyle = ComboBoxStyle.DropDownList;
             this.cboMode.Items.AddRange(new object[] { "Auto", "Natif (test)", "Managé (prod)" });
             this.cboMode.SelectedIndexChanged += this.OnModeChanged;
-            this.lblNativeMagnets.AutoSize = true; this.lblNativeMagnets.Location = new Point(12, 54);
+            this.lblNativeMagnets.AutoSize = true; this.lblNativeMagnets.Location = new Point(16, 64);
             this.lblNativeMagnets.Text = "Natif — dossier des aimants (.prt)";
-            this.txtNativeMagnets.Location = new Point(14, 74); this.txtNativeMagnets.Size = new Size(354, 23);
-            this.btnBrowseMagnets.Location = new Point(376, 73); this.btnBrowseMagnets.Size = new Size(92, 25);
+            this.txtNativeMagnets.Location = new Point(18, 86); this.txtNativeMagnets.Size = new Size(fieldW, 23);
+            this.btnBrowseMagnets.Location = new Point(browseX, 85); this.btnBrowseMagnets.Size = new Size(browseW, 26);
             this.btnBrowseMagnets.Text = "Parcourir…"; this.btnBrowseMagnets.Click += this.OnBrowseMagnets;
-            this.lblNativeRing.AutoSize = true; this.lblNativeRing.Location = new Point(12, 102);
+            this.lblNativeRing.AutoSize = true; this.lblNativeRing.Location = new Point(16, 120);
             this.lblNativeRing.Text = "Natif — anneau / cellules (.prt)";
-            this.txtNativeRing.Location = new Point(14, 122); this.txtNativeRing.Size = new Size(354, 23);
-            this.btnBrowseRing.Location = new Point(376, 121); this.btnBrowseRing.Size = new Size(92, 25);
+            this.txtNativeRing.Location = new Point(18, 142); this.txtNativeRing.Size = new Size(fieldW, 23);
+            this.btnBrowseRing.Location = new Point(browseX, 141); this.btnBrowseRing.Size = new Size(browseW, 26);
             this.btnBrowseRing.Text = "Parcourir…"; this.btnBrowseRing.Click += this.OnBrowseRing;
             this.gbMode.Controls.Add(this.lblMode); this.gbMode.Controls.Add(this.cboMode);
             this.gbMode.Controls.Add(this.lblNativeMagnets); this.gbMode.Controls.Add(this.txtNativeMagnets);
@@ -82,36 +88,36 @@ namespace ThreeDBuilder
             this.gbMode.Controls.Add(this.txtNativeRing); this.gbMode.Controls.Add(this.btnBrowseRing);
 
             // ----- GroupBox Périmètre -----
-            this.gbScope.Text = "Périmètre"; this.gbScope.Location = new Point(12, 300); this.gbScope.Size = new Size(480, 150);
-            this.chkAllRing.AutoSize = true; this.chkAllRing.Location = new Point(12, 24);
+            this.gbScope.Text = "Périmètre"; this.gbScope.Location = new Point(14, 342); this.gbScope.Size = new Size(gw, 168);
+            this.chkAllRing.AutoSize = true; this.chkAllRing.Location = new Point(16, 28);
             this.chkAllRing.Text = "Tout l'anneau"; this.chkAllRing.Checked = true;
             this.chkAllRing.CheckedChanged += this.OnAllRingChanged;
-            this.lblCells.AutoSize = true; this.lblCells.Location = new Point(12, 48); this.lblCells.Text = "Cellules à remplir :";
-            this.lstCells.Location = new Point(14, 68); this.lstCells.Size = new Size(220, 70);
+            this.lblCells.AutoSize = true; this.lblCells.Location = new Point(16, 54); this.lblCells.Text = "Cellules à remplir :";
+            this.lstCells.Location = new Point(18, 76); this.lstCells.Size = new Size(330, 56);
             this.lstCells.CheckOnClick = true; this.lstCells.Enabled = false;
-            this.chkForce.AutoSize = true; this.chkForce.Location = new Point(248, 68);
-            this.chkForce.Text = "Remplissage forcé (purge puis repose)";
+            this.chkForce.AutoSize = true; this.chkForce.Location = new Point(18, 140);
+            this.chkForce.Text = "Remplissage forcé (purge des aimants présents, puis repose)";
             this.gbScope.Controls.Add(this.chkAllRing); this.gbScope.Controls.Add(this.lblCells);
             this.gbScope.Controls.Add(this.lstCells); this.gbScope.Controls.Add(this.chkForce);
 
             // ----- Actions -----
-            this.btnAnalyze.Location = new Point(12, 460); this.btnAnalyze.Size = new Size(150, 34);
+            this.btnAnalyze.Location = new Point(14, 524); this.btnAnalyze.Size = new Size(180, 38);
             this.btnAnalyze.Text = "1 — Analyser"; this.btnAnalyze.Click += this.OnAnalyze;
-            this.btnGenerate.Location = new Point(174, 460); this.btnGenerate.Size = new Size(150, 34);
+            this.btnGenerate.Location = new Point(204, 524); this.btnGenerate.Size = new Size(180, 38);
             this.btnGenerate.Text = "2 — Générer"; this.btnGenerate.Enabled = false; this.btnGenerate.Click += this.OnGenerate;
-            this.btnCancel.Location = new Point(336, 460); this.btnCancel.Size = new Size(156, 34);
+            this.btnCancel.Location = new Point(394, 524); this.btnCancel.Size = new Size(180, 38);
             this.btnCancel.Text = "Annuler"; this.btnCancel.Enabled = false; this.btnCancel.Click += this.OnCancel;
 
             // ----- GroupBox Journal -----
-            this.gbJournal.Text = "Journal"; this.gbJournal.Location = new Point(12, 504); this.gbJournal.Size = new Size(480, 168);
-            this.lblLogLevel.AutoSize = true; this.lblLogLevel.Location = new Point(12, 25); this.lblLogLevel.Text = "Niveau :";
-            this.cboLogLevel.Location = new Point(120, 22); this.cboLogLevel.Size = new Size(150, 23);
+            this.gbJournal.Text = "Journal"; this.gbJournal.Location = new Point(14, 574); this.gbJournal.Size = new Size(gw, 176);
+            this.lblLogLevel.AutoSize = true; this.lblLogLevel.Location = new Point(16, 30); this.lblLogLevel.Text = "Niveau :";
+            this.cboLogLevel.Location = new Point(120, 27); this.cboLogLevel.Size = new Size(180, 23);
             this.cboLogLevel.DropDownStyle = ComboBoxStyle.DropDownList;
             this.cboLogLevel.Items.AddRange(new object[] { "Info", "Avertissements", "Erreurs" });
             this.cboLogLevel.SelectedIndex = 0;
             this.cboLogLevel.SelectedIndexChanged += this.OnLogLevelChanged;
-            this.progressBar.Location = new Point(14, 52); this.progressBar.Size = new Size(452, 18); this.progressBar.Maximum = 1000;
-            this.txtLog.Location = new Point(14, 78); this.txtLog.Size = new Size(452, 80);
+            this.progressBar.Location = new Point(18, 60); this.progressBar.Size = new Size(534, 18); this.progressBar.Maximum = 1000;
+            this.txtLog.Location = new Point(18, 86); this.txtLog.Size = new Size(534, 74);
             this.txtLog.Multiline = true; this.txtLog.ReadOnly = true; this.txtLog.ScrollBars = ScrollBars.Vertical;
             this.txtLog.BackColor = Color.FromArgb(250, 250, 252);
             this.gbJournal.Controls.Add(this.lblLogLevel); this.gbJournal.Controls.Add(this.cboLogLevel);
@@ -121,7 +127,7 @@ namespace ThreeDBuilder
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.Font = new Font("Segoe UI", 9F);
-            this.ClientSize = new Size(504, 684);
+            this.ClientSize = new Size(588, 762);
             this.Controls.Add(this.gbSource); this.Controls.Add(this.gbMode); this.Controls.Add(this.gbScope);
             this.Controls.Add(this.btnAnalyze); this.Controls.Add(this.btnGenerate); this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.gbJournal);
